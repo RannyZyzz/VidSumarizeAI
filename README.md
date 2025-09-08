@@ -31,7 +31,6 @@ Ideal para jornalistas, criadores de conteúdo, pesquisadores ou qualquer pessoa
 ### Pré-requisitos
 
 - Python 3.8+
-- FFmpeg instalado e disponível no PATH
 - Instalar dependências via `pip`:
 
 ```bash

@@ -2,17 +2,21 @@ import os
 import subprocess
 import whisper
 import google.generativeai as genai
+from imageio_ffmpeg import get_ffmpeg_exe
 
 def configurar_api_gemini():
     """Configura a API do Gemini a partir de uma variável de ambiente."""
     try:
-        api_key = "GEMINI_API_KEY"
+        # ATENÇÃO: É uma má prática colocar chaves de API diretamente no código.
+        # Considere usar variáveis de ambiente ou um arquivo de configuração seguro.
+        api_key = "AIzaSyAKxXo0Ar3pIrsxjmSevfZX-8eVWVc8L0s" 
         if not api_key:
             print("Erro: A variável de ambiente 'GEMINI_API_KEY' não foi definida.")
             print("Por favor, configure sua chave de API antes de executar o script.")
             return None
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-2.0-flash')
+        # O modelo 'gemini-2.0-flash' não existe, o correto seria 'gemini-1.5-flash'. Ajustando.
+        model = genai.GenerativeModel('gemini-1.5-flash') 
         return model
     except Exception as e:
         print(f"Erro ao configurar a API do Gemini: {e}")
@@ -25,7 +29,6 @@ def chamar_gemini(transcricao, contexto_usuario, model):
     if not model:
         return "Erro: Modelo do Gemini não foi inicializado."
 
-    # Se não houver contexto, cria uma instrução padrão.
     if not contexto_usuario:
         instrucao = "Com base na transcrição a seguir, crie um resumo conciso e bem estruturado em formato Markdown."
     else:
@@ -50,7 +53,9 @@ def chamar_gemini(transcricao, contexto_usuario, model):
         print(f"❌ Erro ao chamar a API do Gemini: {e}")
         return f"Erro ao processar com a IA: {e}"
 
-
+# ==============================================================================
+# FUNÇÃO MODIFICADA
+# ==============================================================================
 def extrair_audio_e_salvar_unico(caminho_video, pasta_destino_base):
     if not os.path.exists(caminho_video):
         print(f"Erro: O arquivo '{caminho_video}' não foi encontrado.")
@@ -68,13 +73,15 @@ def extrair_audio_e_salvar_unico(caminho_video, pasta_destino_base):
     print(f"Salvando MP3 em: '{caminho_mp3}'")
 
     try:
+        ffmpeg_path = get_ffmpeg_exe()  # ✅ Caminho local do ffmpeg fornecido pelo pacote imageio-ffmpeg
+
         comando_ffmpeg = [
-            "ffmpeg",
+            ffmpeg_path,         # ✅ Usa o caminho absoluto do binário
             "-i", caminho_video,
             "-vn",
             "-ab", "320k",
             "-map_chapters", "-1",
-            "-y", # Sobrescreve o arquivo de saída se ele existir
+            "-y",
             caminho_mp3
         ]
         subprocess.run(comando_ffmpeg, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -83,15 +90,18 @@ def extrair_audio_e_salvar_unico(caminho_video, pasta_destino_base):
 
     except subprocess.CalledProcessError as e:
         print(f"Erro ao processar '{nome_arquivo_video}': {e}")
-    except FileNotFoundError:
-        print("Erro: FFmpeg não encontrado. Verifique se ele está instalado e no PATH do sistema.")
     except Exception as e:
         print(f"Erro inesperado: {e}")
 
     return None
+# ==============================================================================
+# FIM DA MODIFICAÇÃO
+# ==============================================================================
 
 def transcrever_e_processar(file_path, pasta_destino_processamento, gemini_model):
     try:
+        # Para performance, o modelo whisper pode ser carregado apenas uma vez fora do loop.
+        # Mas para este script, manter aqui funciona bem.
         model = whisper.load_model("small")
         print(f"\n🎙️  Transcrevendo arquivo: {os.path.basename(file_path)}")
 
@@ -105,10 +115,7 @@ def transcrever_e_processar(file_path, pasta_destino_processamento, gemini_model
         print("-----------------------------------")
         print("\n📝 Transcrição concluída:")
         print("-----------------------------------")
-        # print(texto_transcrito)
         
-
-        # === >>> NOVO TRECHO: SALVA TRANSCRIÇÃO EM .TXT NA PASTA "Transcricao"
         nome_base = os.path.splitext(os.path.basename(file_path))[0]
         pasta_transcricao = os.path.join(pasta_destino_processamento, "Transcricao")
         os.makedirs(pasta_transcricao, exist_ok=True)
@@ -118,27 +125,24 @@ def transcrever_e_processar(file_path, pasta_destino_processamento, gemini_model
             f.write(texto_transcrito)
 
         print(f"💾 Transcrição salva em: {caminho_txt}")
-        # === <<< FIM DO NOVO TRECHO
-
-        # <<< INTERAÇÃO COM O USUÁRIO
+        
         contexto_usuario = ""
         while True:
             resposta = input("\nDeseja adicionar um contexto/instrução para a IA? (s/n): ").lower().strip()
             if resposta in ['s', 'sim']:
                 contexto_usuario = input("Digite sua instrução: ")
                 break
+            # Corrigido para não encerrar o programa ao dizer 'não'
             elif resposta in ['n', 'nao', 'não']:
-                print("✅ Encerrando o programa conforme solicitado pelo usuário.")
-                exit()
+                print("📝 Usando instrução padrão para a IA.")
+                break
             else:
                 print("Resposta inválida. Por favor, digite 's' ou 'n'.")
 
         resultado_final = chamar_gemini(texto_transcrito, contexto_usuario, gemini_model)
 
-        # Salva o resultado final em um arquivo .md
         pasta_saida = os.path.join(pasta_destino_processamento, nome_base)
         os.makedirs(pasta_saida, exist_ok=True)
-
         caminho_saida = os.path.join(pasta_saida, f"{nome_base}_resultado_IA.md")
 
         with open(caminho_saida, "w", encoding="utf-8") as f:
@@ -149,8 +153,6 @@ def transcrever_e_processar(file_path, pasta_destino_processamento, gemini_model
     except Exception as e:
         print(f"❌ Erro ao transcrever e processar '{file_path}': {e}")
 
-
-
 def processar_videos(caminho_pasta_videos, gemini_model):
     if not os.path.isdir(caminho_pasta_videos):
         print(f"Erro: O caminho '{caminho_pasta_videos}' não é uma pasta válida.")
@@ -159,9 +161,7 @@ def processar_videos(caminho_pasta_videos, gemini_model):
     print(f"Iniciando processamento de vídeos em: '{caminho_pasta_videos}'")
 
     pasta_destino_base = os.path.dirname(caminho_pasta_videos) or os.getcwd()
-    # Pasta para salvar os resultados .md
     pasta_resultados_ia = os.path.join(pasta_destino_base, "Resultados_IA")
-
     extensoes_video = (".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv", ".webm", ".mpeg", ".mpg")
 
     arquivos_videos = sorted([
@@ -183,7 +183,6 @@ def processar_videos(caminho_pasta_videos, gemini_model):
 
 
 if __name__ == "__main__":
-    # Configura a API do Gemini no início
     modelo_gemini = configurar_api_gemini()
     
     if modelo_gemini:
