@@ -47,14 +47,11 @@ def configurar_max_upload(tamanho_mb=1000):
 # ===================== EXECUÇÃO =====================
 
 if __name__ == "__main__":
-    print("🔐 Configuração da API do Gemini")
-    print("🌐 Caso ainda não tenha sua chave de API, gere uma em:")
-    print("👉 https://aistudio.google.com/apikey\n")
-
-    chave = input("Informe sua GEMINI_API_KEY: ").strip()
+    chave = os.getenv("GEMINI_API_KEY")
     if not chave:
-        print("❌ Nenhuma chave foi fornecida. Abortando.")
-    else:
-        criar_secrets_toml(chave)
-        configurar_max_upload()
-        print("🎉 Configuração concluída com sucesso!")
+        print("❌ Variável de ambiente GEMINI_API_KEY não encontrada. Abortando.")
+        exit(1)
+
+    criar_secrets_toml(chave)
+    configurar_max_upload()
+    print("🎉 Configuração concluída com sucesso!")

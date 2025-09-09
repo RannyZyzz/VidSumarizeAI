@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  vidsummarizeai:
+    build:
+      context: .
+      args:
+        GEMINI_API_KEY: ${GEMINI_API_KEY}
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./output:/app/output
+      - ./transcricao:/app/transcricao
+      - ./Resposta_IA:/app/Resposta_IA
