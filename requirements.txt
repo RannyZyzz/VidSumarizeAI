@@ -1,3 +1,5 @@
 openai-whisper
 google-generativeai
 imageio-ffmpeg
+streamlit
+toml

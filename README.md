@@ -1,106 +1,151 @@
-## 📜 Descrição do Projeto
+# 🎬 VidSummarizeAI
 
-**VidSummarizeAI** é uma ferramenta automatizada que transforma vídeos em resumos estruturados em Markdown. O sistema realiza três etapas principais:
-
-1. **Extração de áudio dos vídeos (via FFmpeg)**
-2. **Transcrição do áudio com o modelo Whisper da OpenAI**
-3. **Geração de resumos inteligentes com a API Gemini do Google**
-
-Você pode personalizar o comportamento da IA fornecendo instruções adicionais ou deixar que o sistema use um prompt padrão para gerar resumos concisos.
-
-Ideal para jornalistas, criadores de conteúdo, pesquisadores ou qualquer pessoa que deseje extrair informações rápidas e organizadas de vídeos gravados.
+VidSummarizeAI é uma aplicação interativa desenvolvida com **Streamlit**, **Whisper** e **Gemini AI**, que permite processar vídeos e áudios para **extrair transcrições** e gerar **resumos inteligentes em Markdown**. Ideal para jornalistas, pesquisadores, criadores de conteúdo e qualquer pessoa que deseje transformar vídeos longos em informações resumidas de forma automática.
 
 ---
 
-## 📂 Estrutura Geral
+## 🚀 Funcionalidades
+
+- 🎞️ Extração de áudio de vídeos (.mp4, .mkv, etc.)
+- 🧠 Transcrição automática de áudio com [OpenAI Whisper](https://github.com/openai/whisper)
+- 🤖 Resumo inteligente com a API Gemini (Google)
+- 📝 Interface amigável via [Streamlit](https://streamlit.io/)
+- 💾 Salva automaticamente a transcrição e o resultado da IA em arquivos locais
+
+---
+
+## 🧱 Estrutura do Projeto
 
 ```
-📁 seu_projeto/
-├── seu_script.py
-├── 📁 Resultados_IA/
-│   └── nome_do_video_resultado_IA.md
-├── 📁 Conversao/
-│   └── nome_do_video/
-│       └── nome_do_video.mp3
+VidSummarizeAI/
+├── index.py                     # Aplicação principal em Streamlit
+├── configurar_streamlit.py      # Script de configuração inicial (API + upload)
+├── requirements.txt             # Dependências do projeto
+├── transcricao/                 # Transcrições salvas automaticamente
+├── Resposta_IA/                 # Resumos gerados pela IA
 ```
 
 ---
 
-## 🚀 Como Usar
+## ⚙️ Instalação
 
-### Pré-requisitos
+1. **Clone o repositório**:
 
-- Python 3.8+
-- Instalar dependências via `pip`:
+```bash
+git clone https://github.com/RannyZyzz/VidSumarizeAI.git
+cd VidSummarizeAI
+```
+
+2. **Crie e ative um ambiente virtual (opcional, mas recomendado)**:
+
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+```
+
+3. **Instale as dependências**:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Executando
-
-1. Certifique-se de ter a chave da API Gemini (Google AI Studio).
-2. Atualize a chave diretamente no script ou use uma variável de ambiente.
-3. Execute o script:
+4. **Configure a chave da API Gemini e o tamanho de upload**:
 
 ```bash
-python index.py
+python configurar_streamlit.py
 ```
 
-4. Quando solicitado, forneça o caminho da pasta contendo os vídeos.
-5. Para cada vídeo, o sistema irá:
-   - Extrair o áudio
-   - Transcrever o conteúdo com Whisper
-   - Perguntar se você deseja adicionar uma instrução personalizada para a IA
-   - Enviar para o Gemini e salvar o resultado em `.md`
+Siga as instruções no terminal para colar sua chave `GEMINI_API_KEY`.  
+Você pode gerar a chave aqui: [https://aistudio.google.com/apikey](https://aistudio.google.com/apikey)
 
 ---
 
-## 🧠 Funcionalidades
+## ▶️ Como Usar
 
-- ✅ Suporte a múltiplos formatos de vídeo (.mp4, .mkv, .avi, etc.)
-- ✅ Transcrição automática com Whisper
-- ✅ Geração de conteúdo com instruções personalizadas (via Gemini)
-- ✅ Salvamento automático dos resumos em formato Markdown
-- ✅ Interface interativa via terminal
+Após configurar a API, inicie o aplicativo:
 
----
+```bash
+streamlit run index.py
+```
 
-## ⚙️ Tecnologias Usadas
-
-- Python 3
-- [Whisper (OpenAI)](https://github.com/openai/whisper)
-- [Google Gemini API](https://ai.google.dev)
-- FFmpeg
+A interface web será aberta automaticamente no navegador.
 
 ---
 
-## 🔒 Observações de Segurança
+## 🧪 Modos de Operação
 
-A chave da API Gemini está atualmente hardcoded no script. Para produção, recomenda-se fortemente o uso de variáveis de ambiente para manter a segurança.
+Ao iniciar o app, você poderá escolher entre três modos:
 
-```python
-api_key = os.getenv("GEMINI_API_KEY")
+1. **📽️ Processar vídeo do início ao fim**  
+   - Envie um arquivo de vídeo.
+   - O sistema extrai o áudio, transcreve e gera o resumo.
+
+2. **🎵 Importar apenas MP3**  
+   - Envie diretamente um arquivo `.mp3` para transcrição e resumo.
+
+3. **📝 Importar apenas transcrição**  
+   - Faça upload de um `.txt` com o texto para receber o resumo da IA.
+
+---
+
+## 🔐 Variáveis de Ambiente
+
+A chave da API Gemini será salva automaticamente em:
+
+```
+~/.streamlit/secrets.toml
+
+# Exemplo:
+[GEMINI_API_KEY]
+GEMINI_API_KEY = "sua_chave_aqui"
 ```
 
 ---
 
-## 🛠️ Melhorias Futuras
+## 📂 Saída dos Arquivos
 
-- Interface gráfica (GUI)
-- Suporte a múltiplas línguas na transcrição
-- Geração de slides/resumos visuais
-- Upload direto de arquivos no Google Drive ou Notion
+- **Transcrição**: salva em `transcricao/NOME_BASE.txt`
+- **Resumo da IA**: salvo em `Resposta_IA/NOME_BASE.md`
 
 ---
 
-## 🧑‍💻 Autor
+## 🧠 Tecnologias Utilizadas
 
-- Desenvolvido por [Ranniêr Reis]
-- Contribuições são bem-vindas!
+- [Python](https://www.python.org/)
+- [Streamlit](https://streamlit.io/)
+- [OpenAI Whisper](https://github.com/openai/whisper)
+- [Google Gemini API](https://aistudio.google.com/)
+- [FFmpeg](https://ffmpeg.org/) (gerenciado automaticamente via `imageio-ffmpeg`)
 
 ---
 
-## 📄 Licença
+## ❗ Observações
+
+- O modelo Whisper utilizado é o `small` (ótimo custo-benefício entre velocidade e precisão).
+- A API Gemini pode ter custos dependendo da sua conta Google Cloud.
+- Para arquivos grandes, o limite padrão de upload do Streamlit foi ajustado para **1000MB**.
+
+---
+
+## 📜 Licença
 
 Este projeto está licenciado sob a [MIT License](LICENSE).
+
+---
+
+## 🤝 Contribuição
+
+Contribuições são bem-vindas!  
+Sinta-se à vontade para abrir *Issues* ou enviar *Pull Requests*.
+
+---
+
+## 📧 Contato
+
+Em caso de dúvidas, sugestões ou colaborações:
+
+- ✉️ Email: rannierreis@gmail.com
+- 🧑 GitHub: [@RannyZyzz](https://github.com/RannyZyzz)
+
+---

@@ -1,7 +1,7 @@
-/Resultados_IA
+/Resposta_IA
+/output
+/transcricao
 *.mkv
-/Conversao/*.txt
-/Transcricao/*txt
 *.mp3
 .DS_STORE
 *.mp4
