@@ -13,7 +13,7 @@ def configurar_api_gemini():
         st.error("Chave da API do Gemini não configurada.")
         return None
     genai.configure(api_key=api_key)
-    return genai.GenerativeModel('gemini-1.5-flash')
+    return genai.GenerativeModel('gemini-2.5-flash')
 
 modelo_gemini = configurar_api_gemini()
 
