@@ -9,11 +9,19 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Instala PyTorch (somente CPU) e whisper
-RUN pip install --no-cache-dir \
+# Atualiza as ferramentas de instalação
+RUN python -m pip install --no-cache-dir --upgrade \
+    pip \
+    setuptools \
+    wheel
+
+# Instala PyTorch com suporte somente a CPU
+RUN python -m pip install --no-cache-dir \
     torch \
     torchvision \
     torchaudio \
-    --index-url https://download.pytorch.org/whl/cpu
+    --index-url https://download.pytorch.org/whl/cpu \
+    --extra-index-url https://pypi.org/simple
 
 # Copia os scripts
 COPY index.py configurar_streamlit.py ./
